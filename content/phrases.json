@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "_comment": "Hospede este arquivo (GitHub Raw, Firebase Hosting, seu site) e aponte a URL em lib/services/content_repository.dart -> remoteUrl. Para publicar frases novas, adicione textos aqui e AUMENTE o campo 'version'. O app mescla: categorias novas são adicionadas; categorias existentes (mesmo id) recebem as frases novas sem duplicar. gradient = 2 cores hex.",
+  "categories": [
+    {
+      "id": "bom_dia",
+      "name": "Bom dia",
+      "emoji": "☀️",
+      "gradient": ["#F7971E", "#FFD200"],
+      "phrases": [
+        "Bom dia! Hoje o universo conspira a seu favor — só não vale ficar na cama.",
+        "Que o seu café seja forte e a sua fé, mais ainda. Bom dia!"
+      ]
+    },
+    {
+      "id": "amor",
+      "name": "Amor",
+      "emoji": "❤️",
+      "gradient": ["#FF5F6D", "#FFC371"],
+      "phrases": [
+        "Te amar virou meu hábito favorito e meu plano para sempre.",
+        "Você é o 'bom dia' mais bonito que eu podia querer receber."
+      ]
+    },
+    {
+      "id": "frases_do_mes",
+      "name": "Em alta",
+      "emoji": "🔥",
+      "gradient": ["#FC466B", "#3F5EFB"],
+      "phrases": [
+        "Categoria nova chegando direto da nuvem: o app se atualiza sozinho!",
+        "Conteúdo fresquinho toda semana, sem precisar atualizar na loja.",
+        "Frases em alta para você nunca repetir status."
+      ]
+    },
+    {
+      "id": "pensadores",
+      "name": "Pensadores",
+      "emoji": "📜",
+      "gradient": ["#42275A", "#734B6D"],
+      "_comment": "Frases podem ser string OU objeto com autor:",
+      "phrases": [
+        "Frase simples sem autor.",
+        { "text": "A persistência é o caminho do êxito.", "author": "Charles Chaplin" },
+        { "text": "Conhece-te a ti mesmo.", "author": "Sócrates" }
+      ]
+    }
+  ]
+}

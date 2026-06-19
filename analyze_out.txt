@@ -1,0 +1,15 @@
+Analyzing lib...
+../../runtime/vm/zone.cc: 96: error: Out of memory.
+version=3.12.1 (stable) (Tue May 26 01:02:21 2026 -0700) on "windows_x64"
+pid=10372, thread=972, isolate_group=main(000001B3DA3305E0), isolate=main(000001B3DA331010)
+os=windows, arch=x64, comp=no, sim=no
+isolate_instructions=1b3d911ec00, vm_instructions=1b3d9118000
+fp=48428fd9b0, sp=48428fd970, pc=7ff70a047033
+../../runtime/vm/zone.cc: 96: error: Out of memory.
+../../runtime/vm/zone.cc: 96: error: Out of memory.
+Aborting reentrant request for stack trace.
+Aborting reentrant request for stack trace.
+Bad state: The analysis server crashed unexpectedly
+
+The analysis server shut down unexpectedly.
+Please report this at dartbug.com.

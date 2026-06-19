@@ -1,0 +1,63 @@
+name: frases_status
+description: "Frases & Status - frases e mensagens para compartilhar."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  provider: ^6.1.2
+
+  # Persistence
+  shared_preferences: ^2.3.2
+
+  # UI / Design
+  google_fonts: ^6.2.1
+
+  # Monetization
+  google_mobile_ads: ^5.2.0
+
+  # Compras no app (remover anúncios, temas premium) — Google Play Billing
+  in_app_purchase: ^3.2.0
+
+  # Notifications (frase do dia)
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
+
+  # Share as image / text
+  share_plus: ^10.0.2
+  path_provider: ^2.1.4
+
+  # Utility
+  url_launcher: ^6.3.0
+  package_info_plus: ^8.0.2
+  intl: ^0.19.0
+
+  # Auto-atualização de conteúdo (busca frases novas de um JSON remoto)
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+
+# Ícone do app (rode: dart run flutter_launcher_icons)
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FF1B3D"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"

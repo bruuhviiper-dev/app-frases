@@ -1,0 +1,8 @@
+# Copie este arquivo para "key.properties" (na pasta android/) e preencha.
+# NUNCA versione o key.properties nem o .jks — eles assinam o seu app.
+#
+# storeFile pode ser caminho absoluto ou relativo à pasta android/app.
+storePassword=SUA_SENHA_DO_KEYSTORE
+keyPassword=SUA_SENHA_DA_CHAVE
+keyAlias=upload
+storeFile=upload-keystore.jks
