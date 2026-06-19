@@ -46,7 +46,8 @@ class _FeedScreenState extends State<FeedScreen> {
       _phrases = content.phrasesOf(widget.categoryId!);
       _shuffleOnLoop = false;
     } else {
-      _phrases = List.of(content.allPhrases)..shuffle();
+      final ownsExclusive = context.read<AppState>().ownsExclusivePack;
+      _phrases = List.of(content.readablePhrases(ownsExclusive))..shuffle();
       _shuffleOnLoop = true;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _onView(0));

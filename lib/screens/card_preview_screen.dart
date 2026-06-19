@@ -9,6 +9,7 @@ import '../services/ads_service.dart';
 import '../services/app_state.dart';
 import '../widgets/shareable_card.dart';
 import '../widgets/share_helper.dart';
+import 'store_screen.dart';
 
 /// Editor completo de imagem (status maker): o usuário escolhe fundo, fonte,
 /// formato, alinhamento e tamanho e então salva/compartilha o cartão.
@@ -63,6 +64,85 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
     }
   }
 
+  void _promptWatermark() => _promptStore(
+      'Remover a marca d\'água é um recurso Premium.');
+
+  Future<void> _promptStyles() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text('Estilos premium 🖌️',
+                  style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_circle_fill_rounded,
+                  color: Color(0xFF16A34A)),
+              title: const Text('Assistir um anúncio'),
+              subtitle: const Text('Libera as fontes e fundos por 24 horas'),
+              onTap: () => Navigator.pop(ctx, 'ad'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_rounded,
+                  color: Color(0xFFD9A406)),
+              title: const Text('Comprar Estilos premium'),
+              subtitle: const Text('Desbloqueio permanente'),
+              onTap: () => Navigator.pop(ctx, 'store'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || choice == null) return;
+    if (choice == 'store') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const StoreScreen()),
+      );
+      return;
+    }
+    // Anúncio premiado.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Carregando anúncio…')));
+    final ok = await AdsService.instance.showRewarded();
+    if (!mounted) return;
+    if (ok) {
+      context.read<AppState>().grantTemporaryStyles(const Duration(hours: 24));
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+            content: Text('Estilos premium liberados por 24h! 🎉')));
+    } else {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+            content: Text('Anúncio indisponível agora. Tente mais tarde.')));
+    }
+  }
+
+  void _promptStore(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(
+            label: 'Ver',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StoreScreen()),
+            ),
+          ),
+        ),
+      );
+  }
+
   Future<void> _shareToInstagram() async {
     setState(() => _busy = true);
     final ok = await ShareHelper.shareToInstagramStory(
@@ -82,6 +162,13 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final canRemoveWatermark = appState.canRemoveWatermark;
+    final canUsePremiumStyles = appState.canUsePremiumStyles;
+    // Quem não comprou exporta SEMPRE com a marca (tráfego orgânico).
+    final cardStyle = canRemoveWatermark
+        ? _style
+        : _style.copyWith(showWatermark: true);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Criar imagem'),
@@ -112,7 +199,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
                     key: _captureKey,
                     child: ShareableCard(
                       phrase: widget.phrase,
-                      style: _style,
+                      style: cardStyle,
                     ),
                   ),
                 ),
@@ -125,6 +212,10 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
             onTab: (i) => setState(() => _tab = i),
             onBackground: _setBackground,
             onChange: (s) => setState(() => _style = s),
+            canRemoveWatermark: canRemoveWatermark,
+            onWatermarkLocked: _promptWatermark,
+            canUsePremiumStyles: canUsePremiumStyles,
+            onStylesLocked: _promptStyles,
           ),
           SafeArea(
             top: false,
@@ -173,6 +264,10 @@ class _ControlPanel extends StatelessWidget {
     required this.onTab,
     required this.onBackground,
     required this.onChange,
+    required this.canRemoveWatermark,
+    required this.onWatermarkLocked,
+    required this.canUsePremiumStyles,
+    required this.onStylesLocked,
   });
 
   final CardStyle style;
@@ -180,6 +275,10 @@ class _ControlPanel extends StatelessWidget {
   final ValueChanged<int> onTab;
   final ValueChanged<List<Color>> onBackground;
   final ValueChanged<CardStyle> onChange;
+  final bool canRemoveWatermark;
+  final VoidCallback onWatermarkLocked;
+  final bool canUsePremiumStyles;
+  final VoidCallback onStylesLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -218,9 +317,24 @@ class _ControlPanel extends StatelessWidget {
           SizedBox(
             height: 104,
             child: switch (tab) {
-              0 => _BackgroundTab(style: style, onBackground: onBackground),
-              1 => _TextTab(style: style, onChange: onChange),
-              _ => _FormatTab(style: style, onChange: onChange),
+              0 => _BackgroundTab(
+                  style: style,
+                  onBackground: onBackground,
+                  canUsePremiumStyles: canUsePremiumStyles,
+                  onStylesLocked: onStylesLocked,
+                ),
+              1 => _TextTab(
+                  style: style,
+                  onChange: onChange,
+                  canUsePremiumStyles: canUsePremiumStyles,
+                  onStylesLocked: onStylesLocked,
+                ),
+              _ => _FormatTab(
+                  style: style,
+                  onChange: onChange,
+                  canRemoveWatermark: canRemoveWatermark,
+                  onWatermarkLocked: onWatermarkLocked,
+                ),
             },
           ),
         ],
@@ -338,16 +452,24 @@ class _InstagramButton extends StatelessWidget {
 }
 
 class _BackgroundTab extends StatelessWidget {
-  const _BackgroundTab({required this.style, required this.onBackground});
+  const _BackgroundTab({
+    required this.style,
+    required this.onBackground,
+    required this.canUsePremiumStyles,
+    required this.onStylesLocked,
+  });
 
   final CardStyle style;
   final ValueChanged<List<Color>> onBackground;
+  final bool canUsePremiumStyles;
+  final VoidCallback onStylesLocked;
 
   @override
   Widget build(BuildContext context) {
-    final options = <List<Color>>[
-      ...AppTheme.shareGradients,
-      ...AppTheme.shareSolids.map((c) => [c]),
+    final options = <({List<Color> colors, bool premium})>[
+      for (final g in AppTheme.shareGradients) (colors: g, premium: false),
+      for (final c in AppTheme.shareSolids) (colors: [c], premium: false),
+      for (final g in AppTheme.premiumShareGradients) (colors: g, premium: true),
     ];
     return ListView.separated(
       scrollDirection: Axis.horizontal,
@@ -355,15 +477,17 @@ class _BackgroundTab extends StatelessWidget {
       itemCount: options.length,
       separatorBuilder: (_, _) => const SizedBox(width: 12),
       itemBuilder: (context, i) {
-        final g = options[i];
+        final g = options[i].colors;
+        final locked = options[i].premium && !canUsePremiumStyles;
         final selected =
             g.first.toARGB32() == style.background.first.toARGB32() &&
                 g.length == style.background.length;
         return GestureDetector(
-          onTap: () => onBackground(g),
+          onTap: () => locked ? onStylesLocked() : onBackground(g),
           child: Container(
             width: 52,
             height: 52,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               gradient: g.length >= 2 ? AppTheme.gradient(g) : null,
               color: g.length < 2 ? g.first : null,
@@ -373,6 +497,9 @@ class _BackgroundTab extends StatelessWidget {
                 width: selected ? 3 : 1,
               ),
             ),
+            child: locked
+                ? const Icon(Icons.lock_rounded, color: Colors.white, size: 18)
+                : null,
           ),
         );
       },
@@ -381,10 +508,17 @@ class _BackgroundTab extends StatelessWidget {
 }
 
 class _TextTab extends StatelessWidget {
-  const _TextTab({required this.style, required this.onChange});
+  const _TextTab({
+    required this.style,
+    required this.onChange,
+    required this.canUsePremiumStyles,
+    required this.onStylesLocked,
+  });
 
   final CardStyle style;
   final ValueChanged<CardStyle> onChange;
+  final bool canUsePremiumStyles;
+  final VoidCallback onStylesLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -400,9 +534,18 @@ class _TextTab extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
+                    avatar: (f.premium && !canUsePremiumStyles)
+                        ? const Icon(Icons.lock_rounded, size: 15)
+                        : null,
                     label: Text(f.label),
                     selected: style.font == f,
-                    onSelected: (_) => onChange(style.copyWith(font: f)),
+                    onSelected: (_) {
+                      if (f.premium && !canUsePremiumStyles) {
+                        onStylesLocked();
+                        return;
+                      }
+                      onChange(style.copyWith(font: f));
+                    },
                   ),
                 ),
               const SizedBox(width: 4),
@@ -452,10 +595,17 @@ class _TextTab extends StatelessWidget {
 }
 
 class _FormatTab extends StatelessWidget {
-  const _FormatTab({required this.style, required this.onChange});
+  const _FormatTab({
+    required this.style,
+    required this.onChange,
+    required this.canRemoveWatermark,
+    required this.onWatermarkLocked,
+  });
 
   final CardStyle style;
   final ValueChanged<CardStyle> onChange;
+  final bool canRemoveWatermark;
+  final VoidCallback onWatermarkLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -489,9 +639,18 @@ class _FormatTab extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           FilterChip(
+            avatar: canRemoveWatermark
+                ? null
+                : const Icon(Icons.lock_rounded, size: 16),
             label: const Text('Marca'),
-            selected: style.showWatermark,
-            onSelected: (v) => onChange(style.copyWith(showWatermark: v)),
+            selected: canRemoveWatermark ? style.showWatermark : true,
+            onSelected: (v) {
+              if (!canRemoveWatermark) {
+                onWatermarkLocked();
+                return;
+              }
+              onChange(style.copyWith(showWatermark: v));
+            },
           ),
         ],
       ),

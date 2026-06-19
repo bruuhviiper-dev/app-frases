@@ -45,6 +45,14 @@ Future<void> main() async {
       appState.grantEntitlement(id);
       AdsService.instance.adsRemoved = appState.isPremium;
     })
+    ..onSubscriptionGranted((id) {
+      appState.addSubscription(id);
+      AdsService.instance.adsRemoved = appState.isPremium;
+    })
+    ..onSubscriptionsReconciled((ids) {
+      appState.setActiveSubscriptions(ids);
+      AdsService.instance.adsRemoved = appState.isPremium;
+    })
     ..init();
 
   runApp(FrasesApp(prefs: prefs, content: content, appState: appState));

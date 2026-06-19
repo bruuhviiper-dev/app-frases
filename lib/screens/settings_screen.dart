@@ -6,6 +6,7 @@ import '../data/app_theme.dart';
 import '../services/app_state.dart';
 import '../services/content_repository.dart';
 import '../services/notification_service.dart';
+import '../widgets/share_helper.dart';
 import 'history_screen.dart';
 import 'onboarding_screen.dart';
 import 'store_screen.dart';
@@ -43,6 +44,17 @@ class SettingsScreen extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const StoreScreen()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.ios_share_rounded),
+            title: const Text('Compartilhar o app'),
+            subtitle: const Text('Convide amigos e ajude o app a crescer 💜'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => ShareHelper.shareText(
+              'Baixe o Frases & Status: frases e mensagens prontas pra '
+              'compartilhar! 💜\n'
+              'https://play.google.com/store/apps/details?id=com.frasesstatus.frases_status',
             ),
           ),
           const Divider(),

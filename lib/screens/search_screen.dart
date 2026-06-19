@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/models.dart';
+import '../services/app_state.dart';
 import '../services/content_repository.dart';
 import '../widgets/phrase_list_item.dart';
 
@@ -22,7 +23,8 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _all = context.read<ContentRepository>().allPhrases;
+    final ownsExclusive = context.read<AppState>().ownsExclusivePack;
+    _all = context.read<ContentRepository>().readablePhrases(ownsExclusive);
   }
 
   @override

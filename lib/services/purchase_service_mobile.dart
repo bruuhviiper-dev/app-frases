@@ -20,9 +20,17 @@ class PurchaseService extends ChangeNotifier {
   bool _available = false;
 
   void Function(String productId)? _onGrant;
+  void Function(String productId)? _onSubGrant;
+  void Function(Set<String> activeIds)? _onSubsReconciled;
+  final Set<String> _restoredSubs = {};
+  bool _reconciling = false;
   bool get isAvailable => _available;
 
   void onEntitlement(void Function(String productId) cb) => _onGrant = cb;
+  void onSubscriptionGranted(void Function(String productId) cb) =>
+      _onSubGrant = cb;
+  void onSubscriptionsReconciled(void Function(Set<String> activeIds) cb) =>
+      _onSubsReconciled = cb;
 
   Future<void> init() async {
     _available = await _iap.isAvailable();
@@ -44,15 +52,34 @@ class PurchaseService extends ChangeNotifier {
       debugPrint('queryProductDetails falhou: $e');
     }
 
-    // Recupera compras já feitas (troca de aparelho, reinstalação).
+    // Recupera compras já feitas e revalida quais assinaturas estão ativas.
+    await _reconcile();
+  }
+
+  /// Restaura as compras e, após uma janela, consolida o conjunto de
+  /// assinaturas que voltaram (ou seja, ainda ativas). Assinatura cancelada
+  /// não é restaurada pela Play, então cai fora do conjunto e o premium expira.
+  Future<void> _reconcile() async {
+    _reconciling = true;
+    _restoredSubs.clear();
     await _iap.restorePurchases();
+    Future.delayed(const Duration(seconds: 6), () {
+      if (!_reconciling) return;
+      _reconciling = false;
+      _onSubsReconciled?.call(Set<String>.of(_restoredSubs));
+    });
   }
 
   Future<void> _onPurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final pd in purchases) {
       if (pd.status == PurchaseStatus.purchased ||
           pd.status == PurchaseStatus.restored) {
-        _onGrant?.call(pd.productID);
+        if (StoreProducts.subscriptionIds.contains(pd.productID)) {
+          _restoredSubs.add(pd.productID);
+          _onSubGrant?.call(pd.productID);
+        } else {
+          _onGrant?.call(pd.productID);
+        }
       }
       if (pd.pendingCompletePurchase) {
         await _iap.completePurchase(pd);
@@ -81,7 +108,7 @@ class PurchaseService extends ChangeNotifier {
   }
 
   Future<void> restore() async {
-    if (_available) await _iap.restorePurchases();
+    if (_available) await _reconcile();
   }
 
   @override

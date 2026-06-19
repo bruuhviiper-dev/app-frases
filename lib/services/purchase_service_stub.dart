@@ -10,9 +10,14 @@ class PurchaseService extends ChangeNotifier {
   static final PurchaseService instance = PurchaseService._();
 
   void Function(String productId)? _onGrant;
+  void Function(String productId)? _onSubGrant;
   bool get isAvailable => true;
 
   void onEntitlement(void Function(String productId) cb) => _onGrant = cb;
+  void onSubscriptionGranted(void Function(String productId) cb) =>
+      _onSubGrant = cb;
+  // Sem loja real no preview: não há o que revalidar (no-op).
+  void onSubscriptionsReconciled(void Function(Set<String> activeIds) cb) {}
 
   Future<void> init() async {}
 
@@ -23,7 +28,11 @@ class PurchaseService extends ChangeNotifier {
   Future<PurchaseResult> buy(String productId) async {
     // Simula o tempo de processamento e concede o item.
     await Future.delayed(const Duration(milliseconds: 600));
-    _onGrant?.call(productId);
+    if (StoreProducts.subscriptionIds.contains(productId)) {
+      _onSubGrant?.call(productId);
+    } else {
+      _onGrant?.call(productId);
+    }
     return PurchaseResult.success;
   }
 

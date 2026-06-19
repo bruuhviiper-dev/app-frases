@@ -41,7 +41,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final content = context.watch<ContentRepository>();
-    final phrases = content.allPhrases;
+    // Frase do dia/feed/busca não mostram conteúdo exclusivo a quem não comprou.
+    final phrases = content.readablePhrases(state.ownsExclusivePack);
+    final lockedIds = state.ownsExclusivePack
+        ? const <String>{}
+        : content.categories
+            .where((c) => content.isExclusive(c.id))
+            .map((c) => c.id)
+            .toSet();
     final today = DateTime.now().difference(DateTime(2020)).inDays;
     // Frase do dia personalizada: prioriza os temas escolhidos no onboarding.
     final dailyPool = state.hasInterests
@@ -183,14 +190,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 subtitle: 'seus temas favoritos',
                 subtitleColor: onSurfaceFaint,
               ),
-              _CategoryGrid(categories: forYou),
+              _CategoryGrid(categories: forYou, lockedIds: lockedIds),
             ],
             _CategorySectionHeader(
               title: forYou.isEmpty ? 'Categorias' : 'Mais categorias',
               subtitle: '${content.totalPhrases} frases • atualiza sozinho',
               subtitleColor: onSurfaceFaint,
             ),
-            _CategoryGrid(categories: others),
+            _CategoryGrid(categories: others, lockedIds: lockedIds),
             ],
           ),
         ),
@@ -428,9 +435,10 @@ class _CategorySectionHeader extends StatelessWidget {
 
 /// Grade 2 colunas de categorias (sliver).
 class _CategoryGrid extends StatelessWidget {
-  const _CategoryGrid({required this.categories});
+  const _CategoryGrid({required this.categories, this.lockedIds = const {}});
 
   final List<PhraseCategory> categories;
+  final Set<String> lockedIds;
 
   @override
   Widget build(BuildContext context) {
@@ -441,21 +449,25 @@ class _CategoryGrid extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          childAspectRatio: 1.18,
+          childAspectRatio: 0.98,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, i) {
             final c = categories[i];
+            final locked = lockedIds.contains(c.id);
             return _CategoryTile(
               name: c.name,
               emoji: c.emoji,
               gradient: c.gradient,
               count: c.phrases.length,
+              locked: locked,
               onTap: () {
                 HapticFeedback.selectionClick();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => CategoryScreen(categoryId: c.id),
+                    builder: (_) => locked
+                        ? const StoreScreen()
+                        : CategoryScreen(categoryId: c.id),
                   ),
                 );
               },
@@ -475,6 +487,7 @@ class _CategoryTile extends StatelessWidget {
     required this.gradient,
     required this.count,
     required this.onTap,
+    this.locked = false,
   });
 
   final String name;
@@ -482,6 +495,7 @@ class _CategoryTile extends StatelessWidget {
   final List<Color> gradient;
   final int count;
   final VoidCallback onTap;
+  final bool locked;
 
   @override
   Widget build(BuildContext context) {
@@ -508,52 +522,103 @@ class _CategoryTile extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             splashColor: Colors.white.withValues(alpha: 0.18),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Emoji em destaque dentro de um círculo de "vidro".
-                  Container(
-                    width: 54,
-                    height: 54,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.20),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.28),
-                          width: 1.2),
+            child: Stack(
+              children: [
+                // Emoji gigante como marca d'água no canto.
+                Positioned(
+                  right: -6,
+                  bottom: -10,
+                  child: Text(
+                    emoji,
+                    style: TextStyle(
+                      fontSize: 92,
+                      color: Colors.white.withValues(alpha: 0.15),
                     ),
-                    child: Text(emoji, style: const TextStyle(fontSize: 28)),
                   ),
-                  const Spacer(),
-                  Text(name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                      )),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 9, vertical: 3),
+                ),
+                // Profundidade: brilho no topo, leve sombra embaixo.
+                Positioned.fill(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.10),
+                          Colors.black.withValues(alpha: 0.18),
+                        ],
+                      ),
                     ),
-                    child: Text('$count frases',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        )),
                   ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Selo do emoji em vidro fosco arredondado.
+                      Container(
+                        width: 46,
+                        height: 46,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.22),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.30),
+                              width: 1.2),
+                        ),
+                        child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                      ),
+                      const Spacer(),
+                      Text(name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                            height: 1.05,
+                          )),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                              locked
+                                  ? Icons.lock_rounded
+                                  : Icons.format_quote_rounded,
+                              color: Colors.white.withValues(alpha: 0.85),
+                              size: 13),
+                          const SizedBox(width: 4),
+                          Text(locked ? 'Exclusivo' : '$count frases',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.92),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              )),
+                          const Spacer(),
+                          Container(
+                            width: 26,
+                            height: 26,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.22),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                                locked
+                                    ? Icons.lock_rounded
+                                    : Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 15),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -16,17 +16,20 @@ enum CardFormat {
 
 /// Fontes disponíveis no editor de imagem.
 enum CardFont {
-  playfair('Elegante'),
-  lora('Serifada'),
-  montserrat('Moderna'),
-  poppins('Suave'),
-  bebas('Impacto'),
-  dancing('Manuscrita'),
-  inter('Limpa');
+  playfair('Elegante', false),
+  lora('Serifada', true),
+  montserrat('Moderna', false),
+  poppins('Suave', false),
+  bebas('Impacto', true),
+  dancing('Manuscrita', true),
+  inter('Limpa', false);
 
-  const CardFont(this.label);
+  const CardFont(this.label, this.premium);
 
   final String label;
+
+  /// Fonte exclusiva (requer "Estilos premium").
+  final bool premium;
 
   /// Constrói o [TextStyle] da fonte escolhida.
   TextStyle style({

@@ -63,6 +63,19 @@ class AppTheme {
     Color(0xFF0D1B2A), // azul noite
   ];
 
+  /// Fundos EXCLUSIVOS (requerem "Estilos premium"). Inclui combinações de
+  /// 3 cores e tons especiais que se destacam dos fundos gratuitos.
+  static const List<List<Color>> premiumShareGradients = [
+    [Color(0xFFFDC830), Color(0xFFF37335)], // ouro
+    [Color(0xFF7F00FF), Color(0xFFE100FF)], // uva
+    [Color(0xFF00C9FF), Color(0xFF92FE9D)], // aqua menta
+    [Color(0xFFf953c6), Color(0xFFb91d73)], // magenta
+    [Color(0xFF3a1c71), Color(0xFFd76d77), Color(0xFFffaf7b)], // pôr do sol
+    [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)], // galáxia
+    [Color(0xFF000000), Color(0xFF434343)], // carvão
+    [Color(0xFFffd89b), Color(0xFF19547b)], // areia e mar
+  ];
+
   static LinearGradient gradient(List<Color> colors,
           {Alignment begin = Alignment.topLeft,
           Alignment end = Alignment.bottomRight}) =>

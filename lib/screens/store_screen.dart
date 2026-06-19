@@ -63,6 +63,25 @@ class StoreScreen extends StatelessWidget {
               onBuy: () => _buy(context, StoreProducts.premiumBundle.id),
             ),
           const SizedBox(height: 18),
+          if (!state.isSubscriber) ...[
+            _SectionTitle('Assinatura'),
+            _ProductTile(
+              product: StoreProducts.premiumMonthly,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.premiumMonthly.id),
+              owned: false,
+              onBuy: () => _buy(context, StoreProducts.premiumMonthly.id),
+            ),
+            const SizedBox(height: 10),
+            _ProductTile(
+              product: StoreProducts.premiumYearly,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.premiumYearly.id),
+              owned: false,
+              onBuy: () => _buy(context, StoreProducts.premiumYearly.id),
+            ),
+            const SizedBox(height: 18),
+          ],
           if (!state.isPremium) ...[
             _SectionTitle('Sem anúncios'),
             _ProductTile(
@@ -71,6 +90,39 @@ class StoreScreen extends StatelessWidget {
                   PurchaseService.instance.priceOf(StoreProducts.removeAds.id),
               owned: state.ownsProduct(StoreProducts.removeAds.id),
               onBuy: () => _buy(context, StoreProducts.removeAds.id),
+            ),
+            const SizedBox(height: 18),
+          ],
+          if (!state.ownsProduct(StoreProducts.removeWatermark.id)) ...[
+            _SectionTitle('Compartilhamento'),
+            _ProductTile(
+              product: StoreProducts.removeWatermark,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.removeWatermark.id),
+              owned: state.ownsProduct(StoreProducts.removeWatermark.id),
+              onBuy: () => _buy(context, StoreProducts.removeWatermark.id),
+            ),
+            const SizedBox(height: 18),
+          ],
+          if (!state.ownsProduct(StoreProducts.premiumStyles.id)) ...[
+            _SectionTitle('Editor de imagem'),
+            _ProductTile(
+              product: StoreProducts.premiumStyles,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.premiumStyles.id),
+              owned: state.ownsProduct(StoreProducts.premiumStyles.id),
+              onBuy: () => _buy(context, StoreProducts.premiumStyles.id),
+            ),
+            const SizedBox(height: 18),
+          ],
+          if (!state.ownsProduct(StoreProducts.packExclusivas.id)) ...[
+            _SectionTitle('Conteúdo exclusivo'),
+            _ProductTile(
+              product: StoreProducts.packExclusivas,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.packExclusivas.id),
+              owned: state.ownsProduct(StoreProducts.packExclusivas.id),
+              onBuy: () => _buy(context, StoreProducts.packExclusivas.id),
             ),
             const SizedBox(height: 18),
           ],

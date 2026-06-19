@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -21,11 +22,15 @@ class AdsService {
   static const _testBanneriOS = 'ca-app-pub-3940256099942544/2934735716';
   static const _testInterstitialIOS =
       'ca-app-pub-3940256099942544/4411468910';
+  static const _testRewardedAndroid =
+      'ca-app-pub-3940256099942544/5224354917';
+  static const _testRewardediOS = 'ca-app-pub-3940256099942544/1712485313';
 
   // ----- IDs REAIS (preencher antes de publicar) -----
   static const _realBannerAndroid = 'ca-app-pub-0000000000000000/0000000000';
   static const _realInterstitialAndroid =
       'ca-app-pub-0000000000000000/0000000000';
+  static const _realRewardedAndroid = 'ca-app-pub-0000000000000000/0000000000';
 
   bool _initialized = false;
   InterstitialAd? _interstitial;
@@ -61,6 +66,45 @@ class AdsService {
       return Platform.isIOS ? _testInterstitialIOS : _testInterstitialAndroid;
     }
     return _realInterstitialAndroid;
+  }
+
+  String get rewardedUnitId {
+    if (_useTestAds) {
+      return Platform.isIOS ? _testRewardediOS : _testRewardedAndroid;
+    }
+    return _realRewardedAndroid;
+  }
+
+  /// Carrega e exibe um anúncio premiado. Resolve `true` se o usuário assistiu
+  /// até ganhar a recompensa; `false` se falhou, não há suporte ou desistiu.
+  Future<bool> showRewarded() async {
+    if (!_supported) return false;
+    final completer = Completer<bool>();
+    RewardedAd.load(
+      adUnitId: rewardedUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          var earned = false;
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              if (!completer.isCompleted) completer.complete(earned);
+            },
+            onAdFailedToShowFullScreenContent: (ad, err) {
+              ad.dispose();
+              if (!completer.isCompleted) completer.complete(false);
+            },
+          );
+          ad.show(onUserEarnedReward: (_, _) => earned = true);
+        },
+        onAdFailedToLoad: (err) {
+          debugPrint('Rewarded falhou: $err');
+          if (!completer.isCompleted) completer.complete(false);
+        },
+      ),
+    );
+    return completer.future;
   }
 
   void _preloadInterstitial() {

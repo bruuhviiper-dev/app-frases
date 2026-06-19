@@ -11,4 +11,6 @@ class AdsService {
   Future<void> init() async {}
 
   void registerActionAndMaybeShow() {}
+
+  Future<bool> showRewarded() async => false;
 }

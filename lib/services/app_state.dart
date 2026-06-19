@@ -34,11 +34,16 @@ class AppState extends ChangeNotifier {
   static const _kRatePromptDone = 'rate_prompt_done';
   static const _kCelebratedStreak = 'celebrated_streak';
   static const _kEntitlements = 'entitlements';
+  static const _kTempStylesUntil = 'temp_styles_until';
+  static const _kSubscriptions = 'subscriptions';
   static const _kPaletteId = 'palette_id';
 
   /// Compra que remove anúncios e a do pacote completo.
   static const String pRemoveAds = 'remove_ads';
   static const String pBundle = 'premium_bundle';
+  static const String pRemoveWatermark = 'remove_watermark';
+  static const String pPremiumStyles = 'premium_styles';
+  static const String pPackExclusivas = 'pack_exclusivas';
 
   /// Marcos da ofensiva que disparam uma celebração.
   static const List<int> streakMilestones = [3, 7, 14, 30, 60, 100, 180, 365];
@@ -49,6 +54,8 @@ class AppState extends ChangeNotifier {
   final Set<String> _favorites = {};
   final Set<String> _interests = {};
   final Set<String> _entitlements = {};
+  final Set<String> _subscriptions = {};
+  DateTime? _tempStylesUntil;
   String _paletteId = 'classico';
   final List<String> _myPhrases = [];
   final List<ViewedPhrase> _history = [];
@@ -86,12 +93,66 @@ class AppState extends ChangeNotifier {
   // ----- Loja / compras (compra única) -----
   Set<String> get entitlements => Set.unmodifiable(_entitlements);
 
-  /// Comprou o "remover anúncios" ou o pacote premium.
-  bool get isPremium =>
-      _entitlements.contains(pRemoveAds) || _entitlements.contains(pBundle);
+  /// Tem uma assinatura ativa (revalidada a cada abertura).
+  bool get isSubscriber => _subscriptions.isNotEmpty;
+  Set<String> get subscriptions => Set.unmodifiable(_subscriptions);
 
-  /// O pacote premium dá direito a tudo.
-  bool get hasBundle => _entitlements.contains(pBundle);
+  /// Comprou o "remover anúncios", o pacote premium ou é assinante.
+  bool get isPremium =>
+      isSubscriber ||
+      _entitlements.contains(pRemoveAds) ||
+      _entitlements.contains(pBundle);
+
+  /// Acesso total: pacote único OU assinatura ativa.
+  bool get hasBundle => _entitlements.contains(pBundle) || isSubscriber;
+
+  /// Pode exportar a imagem sem a marca d'água (comprou o item ou o pacote).
+  bool get canRemoveWatermark => ownsProduct(pRemoveWatermark);
+
+  /// Desbloqueio temporário (via anúncio premiado) ainda válido?
+  bool get hasTemporaryStyles =>
+      _tempStylesUntil != null && _tempStylesUntil!.isAfter(DateTime.now());
+
+  /// Quando expira o desbloqueio temporário de estilos (null = sem desbloqueio).
+  DateTime? get temporaryStylesUntil =>
+      hasTemporaryStyles ? _tempStylesUntil : null;
+
+  /// Pode usar fontes/fundos premium no editor (comprou, tem o pacote ou
+  /// desbloqueou temporariamente assistindo a um anúncio).
+  bool get canUsePremiumStyles =>
+      ownsProduct(pPremiumStyles) || hasTemporaryStyles;
+
+  /// Comprou o pacote de frases exclusivas (ou o bundle).
+  bool get ownsExclusivePack => ownsProduct(pPackExclusivas);
+
+  /// Libera os estilos premium por um período (recompensa de anúncio).
+  void grantTemporaryStyles(Duration duration) {
+    _tempStylesUntil = DateTime.now().add(duration);
+    _prefs.setInt(_kTempStylesUntil, _tempStylesUntil!.millisecondsSinceEpoch);
+    notifyListeners();
+  }
+
+  /// Marca uma assinatura como ativa (compra recém-concluída).
+  void addSubscription(String productId) {
+    if (_subscriptions.add(productId)) {
+      _prefs.setStringList(_kSubscriptions, _subscriptions.toList());
+      notifyListeners();
+    }
+  }
+
+  /// Revalida o conjunto de assinaturas ATIVAS (chamado após restaurar compras).
+  /// Se uma assinatura foi cancelada/expirou, ela some daqui e o premium cai.
+  void setActiveSubscriptions(Set<String> activeIds) {
+    if (_subscriptions.length == activeIds.length &&
+        _subscriptions.containsAll(activeIds)) {
+      return; // nada mudou
+    }
+    _subscriptions
+      ..clear()
+      ..addAll(activeIds);
+    _prefs.setStringList(_kSubscriptions, _subscriptions.toList());
+    notifyListeners();
+  }
 
   bool ownsProduct(String productId) =>
       _entitlements.contains(productId) || hasBundle;
@@ -166,6 +227,12 @@ class AppState extends ChangeNotifier {
     _entitlements
       ..clear()
       ..addAll(_prefs.getStringList(_kEntitlements) ?? const []);
+    _subscriptions
+      ..clear()
+      ..addAll(_prefs.getStringList(_kSubscriptions) ?? const []);
+    final tsu = _prefs.getInt(_kTempStylesUntil);
+    _tempStylesUntil =
+        tsu != null ? DateTime.fromMillisecondsSinceEpoch(tsu) : null;
     _paletteId = _prefs.getString(_kPaletteId) ?? 'classico';
     // Se perdeu o direito à paleta (ex.: reembolso), volta pro tema grátis.
     if (!ownsPalette(_paletteId)) _paletteId = 'classico';

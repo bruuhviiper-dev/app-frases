@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models.dart';
 import '../data/phrases.dart';
+import 'store_products.dart';
 
 /// Repositório de conteúdo do app.
 ///
@@ -42,6 +43,19 @@ class ContentRepository extends ChangeNotifier {
       _categories.fold(0, (sum, c) => sum + c.phrases.length);
 
   List<Phrase> get allPhrases => PhraseData.flatten(_categories);
+
+  /// É uma categoria de conteúdo exclusivo (bloqueada sem o pacote)?
+  bool isExclusive(String categoryId) =>
+      StoreProducts.exclusiveCategoryIds.contains(categoryId);
+
+  /// Frases que o usuário pode LER (frase do dia, feed aleatório, busca).
+  /// Quando [ownsExclusive] é falso, remove as categorias exclusivas para o
+  /// conteúdo premium não vazar fora da loja.
+  List<Phrase> readablePhrases(bool ownsExclusive) {
+    if (ownsExclusive) return allPhrases;
+    return PhraseData.flatten(
+        _categories.where((c) => !isExclusive(c.id)).toList());
+  }
 
   PhraseCategory categoryById(String id) => _categories
       .firstWhere((c) => c.id == id, orElse: () => _categories.first);
