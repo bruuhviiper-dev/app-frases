@@ -12,5 +12,7 @@ class AdsService {
 
   void registerActionAndMaybeShow() {}
 
+  void maybeShowAppOpen() {}
+
   Future<bool> showRewarded() async => false;
 }

@@ -25,6 +25,9 @@ class AdsService {
   static const _testRewardedAndroid =
       'ca-app-pub-3940256099942544/5224354917';
   static const _testRewardediOS = 'ca-app-pub-3940256099942544/1712485313';
+  static const _testAppOpenAndroid =
+      'ca-app-pub-3940256099942544/9257395921';
+  static const _testAppOpeniOS = 'ca-app-pub-3940256099942544/5575463023';
 
   // ----- IDs REAIS -----
   static const _realBannerAndroid = 'ca-app-pub-5880219350817278/5661275381';
@@ -32,6 +35,7 @@ class AdsService {
   static const _realInterstitialAndroid =
       'ca-app-pub-0000000000000000/0000000000';
   static const _realRewardedAndroid = 'ca-app-pub-0000000000000000/0000000000';
+  static const _realAppOpenAndroid = 'ca-app-pub-0000000000000000/0000000000';
 
   /// ID placeholder ainda nao preenchido? Entao usamos o de teste.
   static bool _isPlaceholder(String id) => id.contains('0000000000');
@@ -46,6 +50,12 @@ class AdsService {
   bool _initialized = false;
   InterstitialAd? _interstitial;
   bool _loadingInterstitial = false;
+  AppOpenAd? _appOpenAd;
+  DateTime? _lastAppOpenShown;
+
+  /// Evita sobrepor anúncios de tela cheia (e o App Open disparar logo após
+  /// um intersticial/premiado, que também causa um "resume").
+  bool _showingFullScreenAd = false;
 
   /// Quando true (usuário comprou "remover anúncios"/premium), nenhum anúncio
   /// é exibido.
@@ -68,6 +78,7 @@ class AdsService {
     await MobileAds.instance.initialize();
     _initialized = true;
     _preloadInterstitial();
+    _loadAppOpen();
   }
 
   String get bannerUnitId {
@@ -91,6 +102,62 @@ class AdsService {
     return _realRewardedAndroid;
   }
 
+  String get appOpenUnitId {
+    if (_useTestAds || _isPlaceholder(_realAppOpenAndroid)) {
+      return Platform.isIOS ? _testAppOpeniOS : _testAppOpenAndroid;
+    }
+    return _realAppOpenAndroid;
+  }
+
+  void _loadAppOpen() {
+    if (!_supported || _appOpenAd != null) return;
+    AppOpenAd.load(
+      adUnitId: appOpenUnitId,
+      request: const AdRequest(),
+      adLoadCallback: AppOpenAdLoadCallback(
+        onAdLoaded: (ad) => _appOpenAd = ad,
+        onAdFailedToLoad: (err) {
+          _appOpenAd = null;
+          debugPrint('AppOpen falhou: $err');
+        },
+      ),
+    );
+  }
+
+  /// Exibe o anúncio de abertura ao voltar pro app — com bom senso:
+  /// nunca durante outro anúncio e no máximo 1 a cada 4 minutos.
+  void maybeShowAppOpen() {
+    if (!_supported || adsRemoved || _showingFullScreenAd) return;
+    final now = DateTime.now();
+    if (_lastAppOpenShown != null &&
+        now.difference(_lastAppOpenShown!) < const Duration(minutes: 4)) {
+      return;
+    }
+    final ad = _appOpenAd;
+    if (ad == null) {
+      _loadAppOpen();
+      return;
+    }
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (_) => _showingFullScreenAd = true,
+      onAdDismissedFullScreenContent: (ad) {
+        _showingFullScreenAd = false;
+        ad.dispose();
+        _appOpenAd = null;
+        _loadAppOpen();
+      },
+      onAdFailedToShowFullScreenContent: (ad, err) {
+        _showingFullScreenAd = false;
+        ad.dispose();
+        _appOpenAd = null;
+        _loadAppOpen();
+      },
+    );
+    ad.show();
+    _appOpenAd = null;
+    _lastAppOpenShown = now;
+  }
+
   /// Carrega e exibe um anúncio premiado. Resolve `true` se o usuário assistiu
   /// até ganhar a recompensa; `false` se falhou, não há suporte ou desistiu.
   Future<bool> showRewarded() async {
@@ -103,11 +170,14 @@ class AdsService {
         onAdLoaded: (ad) {
           var earned = false;
           ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdShowedFullScreenContent: (_) => _showingFullScreenAd = true,
             onAdDismissedFullScreenContent: (ad) {
+              _showingFullScreenAd = false;
               ad.dispose();
               if (!completer.isCompleted) completer.complete(earned);
             },
             onAdFailedToShowFullScreenContent: (ad, err) {
+              _showingFullScreenAd = false;
               ad.dispose();
               if (!completer.isCompleted) completer.complete(false);
             },
@@ -162,12 +232,15 @@ class AdsService {
     }
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (_) => _showingFullScreenAd = true,
       onAdDismissedFullScreenContent: (ad) {
+        _showingFullScreenAd = false;
         ad.dispose();
         _interstitial = null;
         _preloadInterstitial();
       },
       onAdFailedToShowFullScreenContent: (ad, err) {
+        _showingFullScreenAd = false;
         ad.dispose();
         _interstitial = null;
         _preloadInterstitial();

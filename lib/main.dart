@@ -100,15 +100,31 @@ class _RootGate extends StatefulWidget {
   State<_RootGate> createState() => _RootGateState();
 }
 
-class _RootGateState extends State<_RootGate> {
+class _RootGateState extends State<_RootGate> with WidgetsBindingObserver {
   bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.delayed(const Duration(milliseconds: 1700), () {
       if (mounted) setState(() => _ready = true);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Ao voltar pro app (de segundo plano), mostra o anúncio de abertura
+    // — com os limites de frequência definidos no AdsService.
+    if (state == AppLifecycleState.resumed && _ready) {
+      AdsService.instance.maybeShowAppOpen();
+    }
   }
 
   @override

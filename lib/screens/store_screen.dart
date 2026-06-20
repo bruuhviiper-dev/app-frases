@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../data/app_palettes.dart';
 import '../data/app_theme.dart';
+import '../services/ads_service.dart';
 import '../services/app_state.dart';
 import '../services/purchase_service.dart';
 import '../services/store_products.dart';
@@ -29,6 +30,64 @@ class StoreScreen extends StatelessWidget {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  /// Tema bloqueado: oferece assistir anúncio (libera todos por 24h) ou comprar.
+  Future<void> _unlockTheme(BuildContext context, String productId) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text('Desbloquear tema 🎨',
+                  style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_circle_fill_rounded,
+                  color: Color(0xFF16A34A)),
+              title: const Text('Assistir um anúncio'),
+              subtitle: const Text('Libera TODOS os temas por 24 horas'),
+              onTap: () => Navigator.pop(ctx, 'ad'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_rounded,
+                  color: Color(0xFFD9A406)),
+              title: const Text('Comprar este tema'),
+              subtitle: const Text('Desbloqueio permanente'),
+              onTap: () => Navigator.pop(ctx, 'buy'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted || choice == null) return;
+    if (choice == 'buy') {
+      await _buy(context, productId);
+      return;
+    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Carregando anúncio…')));
+    final ok = await AdsService.instance.showRewarded();
+    if (!context.mounted) return;
+    if (ok) {
+      context.read<AppState>().grantTemporaryThemes(const Duration(hours: 24));
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+            content: Text('Todos os temas liberados por 24h! 🎉')));
+    } else {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+            content: Text('Anúncio indisponível agora. Tente mais tarde.')));
+    }
   }
 
   @override
@@ -169,7 +228,7 @@ class StoreScreen extends StatelessWidget {
                   onUse: () => context.read<AppState>().setPalette(p.id),
                   onBuy: p.productId == null
                       ? null
-                      : () => _buy(context, p.productId!),
+                      : () => _unlockTheme(context, p.productId!),
                 ),
             ],
           ),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +35,7 @@ class AppState extends ChangeNotifier {
   static const _kCelebratedStreak = 'celebrated_streak';
   static const _kEntitlements = 'entitlements';
   static const _kTempStylesUntil = 'temp_styles_until';
+  static const _kTempThemesUntil = 'temp_themes_until';
   static const _kSubscriptions = 'subscriptions';
   static const _kPaletteId = 'palette_id';
 
@@ -59,6 +59,7 @@ class AppState extends ChangeNotifier {
   final Set<String> _entitlements = {};
   final Set<String> _subscriptions = {};
   DateTime? _tempStylesUntil;
+  DateTime? _tempThemesUntil;
   String _customSignature = '';
   String _paletteId = 'classico';
   final List<String> _myPhrases = [];
@@ -177,7 +178,19 @@ class AppState extends ChangeNotifier {
   bool ownsPalette(String paletteId) {
     final p = AppPalettes.byId(paletteId);
     if (!p.premium) return true; // tema grátis
+    if (hasTemporaryThemes) return true; // desbloqueado via anúncio (24h)
     return p.productId != null && ownsProduct(p.productId!);
+  }
+
+  /// Desbloqueio temporário de TODOS os temas (recompensa de anúncio).
+  bool get hasTemporaryThemes =>
+      _tempThemesUntil != null && _tempThemesUntil!.isAfter(DateTime.now());
+
+  /// Libera todos os temas por um período (recompensa de anúncio premiado).
+  void grantTemporaryThemes(Duration duration) {
+    _tempThemesUntil = DateTime.now().add(duration);
+    _prefs.setInt(_kTempThemesUntil, _tempThemesUntil!.millisecondsSinceEpoch);
+    notifyListeners();
   }
 
   /// Paleta de cores ativa (tema vendável).
@@ -244,15 +257,15 @@ class AppState extends ChangeNotifier {
     _entitlements
       ..clear()
       ..addAll(_prefs.getStringList(_kEntitlements) ?? const []);
-    // DEBUG: em builds de teste, libera o premium pra revisar as funções.
-    // Em release (publicação) NÃO entra — tudo continua pago normalmente.
-    if (kDebugMode) _entitlements.add(pBundle);
     _subscriptions
       ..clear()
       ..addAll(_prefs.getStringList(_kSubscriptions) ?? const []);
     final tsu = _prefs.getInt(_kTempStylesUntil);
     _tempStylesUntil =
         tsu != null ? DateTime.fromMillisecondsSinceEpoch(tsu) : null;
+    final ttu = _prefs.getInt(_kTempThemesUntil);
+    _tempThemesUntil =
+        ttu != null ? DateTime.fromMillisecondsSinceEpoch(ttu) : null;
     _customSignature = _prefs.getString(_kCustomSignature) ?? '';
     _paletteId = _prefs.getString(_kPaletteId) ?? 'classico';
     // Se perdeu o direito à paleta (ex.: reembolso), volta pro tema grátis.
