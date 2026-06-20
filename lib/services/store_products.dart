@@ -74,7 +74,11 @@ class StoreProducts {
   );
 
   /// IDs das categorias que só ficam liberadas com [packExclusivas] (ou bundle).
-  static const Set<String> exclusiveCategoryIds = {'exc_pesadas', 'exc_rica'};
+  static const Set<String> exclusiveCategoryIds = {
+    'exc_pesadas',
+    'exc_rica',
+    'exc_cantadas',
+  };
 
   static const premiumBundle = StoreProduct(
     id: 'premium_bundle',
