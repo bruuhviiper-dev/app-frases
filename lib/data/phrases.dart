@@ -1165,7 +1165,11 @@ class PhraseData {
     });
 
     // 1b) Lotes bônus: mais frases (sem autor) para categorias existentes.
-    for (final pack in [PhraseExtra.bonusPhrases, PhraseExtra.bonusPhrases2]) {
+    for (final pack in [
+      PhraseExtra.bonusPhrases,
+      PhraseExtra.bonusPhrases2,
+      PhraseExtra.bonusPhrases3,
+    ]) {
       pack.forEach((id, extra) {
         final base = byId[id];
         if (base == null) return;
