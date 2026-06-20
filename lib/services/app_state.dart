@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -243,6 +244,9 @@ class AppState extends ChangeNotifier {
     _entitlements
       ..clear()
       ..addAll(_prefs.getStringList(_kEntitlements) ?? const []);
+    // DEBUG: em builds de teste, libera o premium pra revisar as funções.
+    // Em release (publicação) NÃO entra — tudo continua pago normalmente.
+    if (kDebugMode) _entitlements.add(pBundle);
     _subscriptions
       ..clear()
       ..addAll(_prefs.getStringList(_kSubscriptions) ?? const []);

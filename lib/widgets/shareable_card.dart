@@ -53,37 +53,54 @@ class ShareableCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: crossAxis,
             children: [
-              const Spacer(),
-              Text('“',
-                  style: GoogleFonts.playfairDisplay(
-                    color: textColor.withValues(alpha: 0.85),
-                    fontSize: 84,
-                    height: 0.7,
-                    fontWeight: FontWeight.w700,
-                  )),
-              const SizedBox(height: 6),
-              Text(
-                phrase.text,
-                textAlign: style.align,
-                style: style.font.style(
-                  fontSize: fontSize,
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
+              // Conteúdo central que se ajusta (encolhe) a qualquer formato,
+              // evitando o "overflow" (tarja amarela/preta) no quadrado etc.
+              Expanded(
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SizedBox(
+                      width: 292,
+                      child: Column(
+                        crossAxisAlignment: crossAxis,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('“',
+                              style: GoogleFonts.playfairDisplay(
+                                color: textColor.withValues(alpha: 0.85),
+                                fontSize: 84,
+                                height: 0.7,
+                                fontWeight: FontWeight.w700,
+                              )),
+                          const SizedBox(height: 6),
+                          Text(
+                            phrase.text,
+                            textAlign: style.align,
+                            style: style.font.style(
+                              fontSize: fontSize,
+                              color: textColor,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                          ),
+                          if (hasAuthor) ...[
+                            const SizedBox(height: 18),
+                            Text('— ${phrase.author}',
+                                textAlign: style.align,
+                                style: GoogleFonts.inter(
+                                  color: textColor.withValues(alpha: 0.92),
+                                  fontSize: 16,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              if (hasAuthor) ...[
-                const SizedBox(height: 18),
-                Text('— ${phrase.author}',
-                    textAlign: style.align,
-                    style: GoogleFonts.inter(
-                      color: textColor.withValues(alpha: 0.92),
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.w600,
-                    )),
-              ],
-              const Spacer(),
+              const SizedBox(height: 12),
               if (style.showWatermark)
                 Row(
                   mainAxisAlignment: switch (style.align) {
