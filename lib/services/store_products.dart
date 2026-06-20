@@ -55,6 +55,15 @@ class StoreProducts {
     emoji: '💧',
   );
 
+  static const customSignature = StoreProduct(
+    id: 'custom_signature',
+    kind: ProductKind.watermark,
+    title: 'Marca personalizada',
+    description: 'Use o seu nome/@ na assinatura das imagens (ideal p/ criadores e lojas).',
+    fallbackPrice: 'R\$ 6,90',
+    emoji: '✍️',
+  );
+
   static const premiumStyles = StoreProduct(
     id: 'premium_styles',
     kind: ProductKind.styles,
@@ -134,6 +143,7 @@ class StoreProducts {
   static List<StoreProduct> get all => [
         removeAds,
         removeWatermark,
+        customSignature,
         premiumStyles,
         packExclusivas,
         premiumBundle,

@@ -104,6 +104,17 @@ class StoreScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
           ],
+          if (!state.ownsProduct(StoreProducts.customSignature.id)) ...[
+            _SectionTitle('Marca personalizada'),
+            _ProductTile(
+              product: StoreProducts.customSignature,
+              price: PurchaseService.instance
+                  .priceOf(StoreProducts.customSignature.id),
+              owned: state.ownsProduct(StoreProducts.customSignature.id),
+              onBuy: () => _buy(context, StoreProducts.customSignature.id),
+            ),
+            const SizedBox(height: 18),
+          ],
           if (!state.ownsProduct(StoreProducts.premiumStyles.id)) ...[
             _SectionTitle('Editor de imagem'),
             _ProductTile(

@@ -105,6 +105,7 @@ class CardStyle {
     this.showAuthor = true,
     this.showWatermark = true,
     this.lightText = true,
+    this.watermarkText = 'Frases & Status',
   });
 
   /// Cores do fundo. Uma cor = fundo sólido; duas+ = gradiente.
@@ -119,6 +120,9 @@ class CardStyle {
   /// Texto claro (branco) sobre fundo escuro; quando falso, texto escuro.
   final bool lightText;
 
+  /// Texto da marca/assinatura no rodapé (premium pode personalizar).
+  final String watermarkText;
+
   CardStyle copyWith({
     List<Color>? background,
     CardFont? font,
@@ -128,6 +132,7 @@ class CardStyle {
     bool? showAuthor,
     bool? showWatermark,
     bool? lightText,
+    String? watermarkText,
   }) {
     return CardStyle(
       background: background ?? this.background,
@@ -138,6 +143,65 @@ class CardStyle {
       showAuthor: showAuthor ?? this.showAuthor,
       showWatermark: showWatermark ?? this.showWatermark,
       lightText: lightText ?? this.lightText,
+      watermarkText: watermarkText ?? this.watermarkText,
     );
   }
 }
+
+/// Modelo pronto de cartão (aplicado com 1 toque no editor).
+class CardTemplate {
+  const CardTemplate({
+    required this.name,
+    required this.background,
+    this.font = CardFont.playfair,
+    this.align = TextAlign.center,
+    this.lightText = true,
+    this.premium = false,
+  });
+
+  final String name;
+  final List<Color> background;
+  final CardFont font;
+  final TextAlign align;
+  final bool lightText;
+  final bool premium;
+}
+
+/// Catálogo de modelos de cartão. Os marcados como [premium] exigem
+/// "Estilos premium".
+const cardTemplates = <CardTemplate>[
+  CardTemplate(name: 'Clássico', background: [Color(0xFF15151A)]),
+  CardTemplate(
+      name: 'Pôr do sol',
+      background: [Color(0xFFFF512F), Color(0xFFDD2476)],
+      font: CardFont.montserrat),
+  CardTemplate(
+      name: 'Minimal',
+      background: [Color(0xFFFFFFFF)],
+      font: CardFont.inter,
+      lightText: false),
+  CardTemplate(
+      name: 'Aurora',
+      background: [Color(0xFF654EA3), Color(0xFFEAAFC8)],
+      font: CardFont.poppins),
+  CardTemplate(
+      name: 'Ouro',
+      background: [Color(0xFFFDC830), Color(0xFFF37335)],
+      premium: true),
+  CardTemplate(
+      name: 'Impacto',
+      background: [Color(0xFF000000), Color(0xFF434343)],
+      font: CardFont.bebas,
+      premium: true),
+  CardTemplate(
+      name: 'Romance',
+      background: [Color(0xFFEE9CA7), Color(0xFFFFDDE1)],
+      font: CardFont.dancing,
+      lightText: false,
+      premium: true),
+  CardTemplate(
+      name: 'Galáxia',
+      background: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
+      font: CardFont.lora,
+      premium: true),
+];

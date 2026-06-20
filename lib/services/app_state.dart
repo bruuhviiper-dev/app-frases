@@ -44,6 +44,8 @@ class AppState extends ChangeNotifier {
   static const String pRemoveWatermark = 'remove_watermark';
   static const String pPremiumStyles = 'premium_styles';
   static const String pPackExclusivas = 'pack_exclusivas';
+  static const String pCustomSignature = 'custom_signature';
+  static const _kCustomSignature = 'custom_signature_text';
 
   /// Marcos da ofensiva que disparam uma celebração.
   static const List<int> streakMilestones = [3, 7, 14, 30, 60, 100, 180, 365];
@@ -56,6 +58,7 @@ class AppState extends ChangeNotifier {
   final Set<String> _entitlements = {};
   final Set<String> _subscriptions = {};
   DateTime? _tempStylesUntil;
+  String _customSignature = '';
   String _paletteId = 'classico';
   final List<String> _myPhrases = [];
   final List<ViewedPhrase> _history = [];
@@ -124,6 +127,19 @@ class AppState extends ChangeNotifier {
 
   /// Comprou o pacote de frases exclusivas (ou o bundle).
   bool get ownsExclusivePack => ownsProduct(pPackExclusivas);
+
+  /// Pode personalizar a marca/assinatura das imagens (comprou ou tem bundle).
+  bool get canCustomSignature => ownsProduct(pCustomSignature);
+
+  /// Texto da assinatura personalizada (vazio = usa a marca padrão do app).
+  String get customSignature => _customSignature;
+
+  /// Define a assinatura personalizada exibida nas imagens compartilhadas.
+  void setCustomSignature(String text) {
+    _customSignature = text.trim();
+    _prefs.setString(_kCustomSignature, _customSignature);
+    notifyListeners();
+  }
 
   /// Libera os estilos premium por um período (recompensa de anúncio).
   void grantTemporaryStyles(Duration duration) {
@@ -233,6 +249,7 @@ class AppState extends ChangeNotifier {
     final tsu = _prefs.getInt(_kTempStylesUntil);
     _tempStylesUntil =
         tsu != null ? DateTime.fromMillisecondsSinceEpoch(tsu) : null;
+    _customSignature = _prefs.getString(_kCustomSignature) ?? '';
     _paletteId = _prefs.getString(_kPaletteId) ?? 'classico';
     // Se perdeu o direito à paleta (ex.: reembolso), volta pro tema grátis.
     if (!ownsPalette(_paletteId)) _paletteId = 'classico';

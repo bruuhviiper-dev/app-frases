@@ -43,6 +43,15 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
     setState(() => _style = _style.copyWith(background: bg, lightText: light));
   }
 
+  void _applyTemplate(CardTemplate t) {
+    setState(() => _style = _style.copyWith(
+          background: t.background,
+          font: t.font,
+          align: t.align,
+          lightText: t.lightText,
+        ));
+  }
+
   Future<void> _share() async {
     setState(() => _busy = true);
     final ok = await ShareHelper.shareBoundary(
@@ -165,10 +174,16 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
     final appState = context.watch<AppState>();
     final canRemoveWatermark = appState.canRemoveWatermark;
     final canUsePremiumStyles = appState.canUsePremiumStyles;
+    // Assinatura: usa a marca personalizada (premium) ou a marca padrão.
+    final signature =
+        appState.canCustomSignature && appState.customSignature.isNotEmpty
+            ? appState.customSignature
+            : 'Frases & Status';
     // Quem não comprou exporta SEMPRE com a marca (tráfego orgânico).
-    final cardStyle = canRemoveWatermark
-        ? _style
-        : _style.copyWith(showWatermark: true);
+    final cardStyle = (canRemoveWatermark
+            ? _style
+            : _style.copyWith(showWatermark: true))
+        .copyWith(watermarkText: signature);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Criar imagem'),
@@ -216,6 +231,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
             onWatermarkLocked: _promptWatermark,
             canUsePremiumStyles: canUsePremiumStyles,
             onStylesLocked: _promptStyles,
+            onTemplate: _applyTemplate,
           ),
           SafeArea(
             top: false,
@@ -268,6 +284,7 @@ class _ControlPanel extends StatelessWidget {
     required this.onWatermarkLocked,
     required this.canUsePremiumStyles,
     required this.onStylesLocked,
+    required this.onTemplate,
   });
 
   final CardStyle style;
@@ -279,6 +296,7 @@ class _ControlPanel extends StatelessWidget {
   final VoidCallback onWatermarkLocked;
   final bool canUsePremiumStyles;
   final VoidCallback onStylesLocked;
+  final void Function(CardTemplate) onTemplate;
 
   @override
   Widget build(BuildContext context) {
@@ -311,6 +329,11 @@ class _ControlPanel extends StatelessWidget {
                     label: 'Formato',
                     selected: tab == 2,
                     onTap: () => onTab(2)),
+                _TabChip(
+                    icon: Icons.auto_awesome_mosaic_rounded,
+                    label: 'Modelos',
+                    selected: tab == 3,
+                    onTap: () => onTab(3)),
               ],
             ),
           ),
@@ -329,11 +352,16 @@ class _ControlPanel extends StatelessWidget {
                   canUsePremiumStyles: canUsePremiumStyles,
                   onStylesLocked: onStylesLocked,
                 ),
-              _ => _FormatTab(
+              2 => _FormatTab(
                   style: style,
                   onChange: onChange,
                   canRemoveWatermark: canRemoveWatermark,
                   onWatermarkLocked: onWatermarkLocked,
+                ),
+              _ => _TemplateTab(
+                  canUsePremiumStyles: canUsePremiumStyles,
+                  onStylesLocked: onStylesLocked,
+                  onTemplate: onTemplate,
                 ),
             },
           ),
@@ -654,6 +682,67 @@ class _FormatTab extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TemplateTab extends StatelessWidget {
+  const _TemplateTab({
+    required this.canUsePremiumStyles,
+    required this.onStylesLocked,
+    required this.onTemplate,
+  });
+
+  final bool canUsePremiumStyles;
+  final VoidCallback onStylesLocked;
+  final void Function(CardTemplate) onTemplate;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      itemCount: cardTemplates.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 12),
+      itemBuilder: (context, i) {
+        final t = cardTemplates[i];
+        final locked = t.premium && !canUsePremiumStyles;
+        return GestureDetector(
+          onTap: () => locked ? onStylesLocked() : onTemplate(t),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: t.background.length >= 2
+                      ? AppTheme.gradient(t.background)
+                      : null,
+                  color: t.background.length < 2 ? t.background.first : null,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.black12),
+                ),
+                child: locked
+                    ? const Icon(Icons.lock_rounded,
+                        color: Colors.white, size: 18)
+                    : Text('“',
+                        style: TextStyle(
+                          color: t.lightText ? Colors.white : Colors.black87,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          height: 1.6,
+                        )),
+              ),
+              const SizedBox(height: 5),
+              Text(t.name,
+                  style: const TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        );
+      },
     );
   }
 }

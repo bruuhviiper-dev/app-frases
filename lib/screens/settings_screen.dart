@@ -14,6 +14,37 @@ import 'store_screen.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  /// Diálogo para definir a marca/assinatura personalizada (premium).
+  Future<void> _editSignature(BuildContext context, String current) async {
+    final controller = TextEditingController(text: current);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Marca personalizada'),
+        content: TextField(
+          controller: controller,
+          maxLength: 24,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Seu nome ou @usuario',
+            helperText: 'Aparece no rodapé das imagens que você criar.',
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+              child: const Text('Salvar')),
+        ],
+      ),
+    );
+    if (result != null && context.mounted) {
+      context.read<AppState>().setCustomSignature(result);
+    }
+  }
+
   /// Reagenda as notificações conforme as preferências atuais.
   Future<void> _reschedule(AppState state) async {
     await NotificationService.instance.scheduleDaily(
@@ -45,6 +76,26 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const StoreScreen()),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.drive_file_rename_outline_rounded,
+                color: Color(0xFF0EA5E9)),
+            title: const Text('Marca personalizada'),
+            subtitle: Text(state.canCustomSignature
+                ? (state.customSignature.isEmpty
+                    ? 'Toque para definir seu nome/@'
+                    : 'Assinatura: ${state.customSignature}')
+                : 'Premium: use seu nome/@ nas imagens'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              if (state.canCustomSignature) {
+                _editSignature(context, state.customSignature);
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const StoreScreen()),
+                );
+              }
+            },
           ),
           ListTile(
             leading: const Icon(Icons.ios_share_rounded),

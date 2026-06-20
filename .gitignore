@@ -48,3 +48,6 @@ app.*.map.json
 /android/key.properties
 **/*.jks
 **/*.keystore
+
+# Build do Android (saida)
+/android/build/

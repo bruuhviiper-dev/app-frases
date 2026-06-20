@@ -86,6 +86,48 @@ class AppPalettes {
       gradient: [Color(0xFF141E30), Color(0xFF243B55)],
       productId: 'theme_meianoite',
     ),
+    AppPalette(
+      id: 'rosa',
+      name: 'Rosa Choque',
+      accent: Color(0xFFEC4899),
+      gradient: [Color(0xFFF857A6), Color(0xFFFF5858)],
+      productId: 'theme_rosa',
+    ),
+    AppPalette(
+      id: 'coral',
+      name: 'Coral',
+      accent: Color(0xFFFB7185),
+      gradient: [Color(0xFFFF9966), Color(0xFFFF5E62)],
+      productId: 'theme_coral',
+    ),
+    AppPalette(
+      id: 'lavanda',
+      name: 'Lavanda',
+      accent: Color(0xFFA78BFA),
+      gradient: [Color(0xFF654EA3), Color(0xFFEAAFC8)],
+      productId: 'theme_lavanda',
+    ),
+    AppPalette(
+      id: 'grafite',
+      name: 'Grafite',
+      accent: Color(0xFF94A3B8),
+      gradient: [Color(0xFF1F1C2C), Color(0xFF928DAB)],
+      productId: 'theme_grafite',
+    ),
+    AppPalette(
+      id: 'turquesa',
+      name: 'Turquesa',
+      accent: Color(0xFF14B8A6),
+      gradient: [Color(0xFF1CD8D2), Color(0xFF16A085)],
+      productId: 'theme_turquesa',
+    ),
+    AppPalette(
+      id: 'vinho',
+      name: 'Vinho',
+      accent: Color(0xFFBE123C),
+      gradient: [Color(0xFF42275A), Color(0xFF734B6D)],
+      productId: 'theme_vinho',
+    ),
   ];
 
   static AppPalette byId(String id) =>

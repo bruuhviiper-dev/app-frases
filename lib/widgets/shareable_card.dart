@@ -104,7 +104,7 @@ class ShareableCard extends StatelessWidget {
                           color: textColor, size: 14),
                     ),
                     const SizedBox(width: 8),
-                    Text('Frases & Status',
+                    Text(style.watermarkText,
                         style: GoogleFonts.inter(
                           color: textColor.withValues(alpha: 0.85),
                           fontSize: 13,
