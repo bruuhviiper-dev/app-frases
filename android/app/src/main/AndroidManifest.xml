@@ -9,10 +9,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- AdMob App ID (ID de TESTE do Google; troque pelo seu antes de publicar) -->
+        <!-- AdMob App ID real (conta do app "Frases para status"). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-5880219350817278~6268769728"/>
 
         <activity
             android:name=".MainActivity"

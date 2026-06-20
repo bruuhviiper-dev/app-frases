@@ -13,7 +13,7 @@ class AdsService {
   AdsService._();
   static final AdsService instance = AdsService._();
 
-  static const bool _useTestAds = true;
+  static const bool _useTestAds = false;
 
   // ----- IDs de TESTE oficiais do Google -----
   static const _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
@@ -26,11 +26,22 @@ class AdsService {
       'ca-app-pub-3940256099942544/5224354917';
   static const _testRewardediOS = 'ca-app-pub-3940256099942544/1712485313';
 
-  // ----- IDs REAIS (preencher antes de publicar) -----
-  static const _realBannerAndroid = 'ca-app-pub-0000000000000000/0000000000';
+  // ----- IDs REAIS -----
+  static const _realBannerAndroid = 'ca-app-pub-5880219350817278/5661275381';
+  // Ainda nao criados: caem em teste automaticamente (ver getters abaixo).
   static const _realInterstitialAndroid =
       'ca-app-pub-0000000000000000/0000000000';
   static const _realRewardedAndroid = 'ca-app-pub-0000000000000000/0000000000';
+
+  /// ID placeholder ainda nao preenchido? Entao usamos o de teste.
+  static bool _isPlaceholder(String id) => id.contains('0000000000');
+
+  /// Dispositivos de teste: recebem ANUNCIOS DE TESTE mesmo usando os IDs
+  /// reais (preenchimento garantido e ZERO risco de ban). Rode o app uma vez
+  /// no seu celular e pegue o ID no logcat (linha do tipo:
+  /// "setTestDeviceIds(Arrays.asList(\"33BE2250B43518CCDA7DE426D04EE231\"))")
+  /// e cole aqui.
+  static const List<String> _testDeviceIds = [];
 
   bool _initialized = false;
   InterstitialAd? _interstitial;
@@ -49,6 +60,11 @@ class AdsService {
 
   Future<void> init() async {
     if (_initialized || !_supported) return;
+    if (_testDeviceIds.isNotEmpty) {
+      await MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: _testDeviceIds),
+      );
+    }
     await MobileAds.instance.initialize();
     _initialized = true;
     _preloadInterstitial();
@@ -62,14 +78,14 @@ class AdsService {
   }
 
   String get interstitialUnitId {
-    if (_useTestAds) {
+    if (_useTestAds || _isPlaceholder(_realInterstitialAndroid)) {
       return Platform.isIOS ? _testInterstitialIOS : _testInterstitialAndroid;
     }
     return _realInterstitialAndroid;
   }
 
   String get rewardedUnitId {
-    if (_useTestAds) {
+    if (_useTestAds || _isPlaceholder(_realRewardedAndroid)) {
       return Platform.isIOS ? _testRewardediOS : _testRewardedAndroid;
     }
     return _realRewardedAndroid;
