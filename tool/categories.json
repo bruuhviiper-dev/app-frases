@@ -1,0 +1,298 @@
+﻿[
+    {
+        "id":  "aesthetic",
+        "name":  "Aesthetic"
+    },
+    {
+        "id":  "amizade",
+        "name":  "Amizade"
+    },
+    {
+        "id":  "amor",
+        "name":  "Amor"
+    },
+    {
+        "id":  "amor_distancia",
+        "name":  "Amor à distância"
+    },
+    {
+        "id":  "amor_proprio",
+        "name":  "Amor próprio"
+    },
+    {
+        "id":  "amor_proprio2",
+        "name":  "Cuide de Você"
+    },
+    {
+        "id":  "aniversario",
+        "name":  "Aniversário"
+    },
+    {
+        "id":  "ano_novo",
+        "name":  "Ano Novo \u0026 Datas"
+    },
+    {
+        "id":  "atitude",
+        "name":  "Atitude"
+    },
+    {
+        "id":  "bio",
+        "name":  "Bio \u0026 Perfil"
+    },
+    {
+        "id":  "boa_noite",
+        "name":  "Boa noite"
+    },
+    {
+        "id":  "boa_semana",
+        "name":  "Boa semana"
+    },
+    {
+        "id":  "boa_tarde",
+        "name":  "Boa tarde"
+    },
+    {
+        "id":  "bom_dia",
+        "name":  "Bom dia"
+    },
+    {
+        "id":  "cafe",
+        "name":  "Café \u0026 Segunda"
+    },
+    {
+        "id":  "casamento",
+        "name":  "Casamento"
+    },
+    {
+        "id":  "ciumes",
+        "name":  "Ciúmes"
+    },
+    {
+        "id":  "crush",
+        "name":  "Crush"
+    },
+    {
+        "id":  "datas",
+        "name":  "Datas especiais"
+    },
+    {
+        "id":  "desabafo",
+        "name":  "Desabafo"
+    },
+    {
+        "id":  "desilusao",
+        "name":  "Desilusão"
+    },
+    {
+        "id":  "dia_namorados",
+        "name":  "Dia dos Namorados"
+    },
+    {
+        "id":  "empoderamento",
+        "name":  "Empoderamento"
+    },
+    {
+        "id":  "exc_pesadas",
+        "name":  "Indiretas pesadas"
+    },
+    {
+        "id":  "exc_rica",
+        "name":  "Mentalidade rica"
+    },
+    {
+        "id":  "familia",
+        "name":  "Família"
+    },
+    {
+        "id":  "fe",
+        "name":  "Fé \u0026 Deus"
+    },
+    {
+        "id":  "festa_junina",
+        "name":  "Festa Junina"
+    },
+    {
+        "id":  "filosofos",
+        "name":  "Grandes Filósofos"
+    },
+    {
+        "id":  "foco",
+        "name":  "Foco \u0026 Sucesso"
+    },
+    {
+        "id":  "frases_curtas",
+        "name":  "Frases curtas"
+    },
+    {
+        "id":  "funk",
+        "name":  "Funk"
+    },
+    {
+        "id":  "genios_ciencia",
+        "name":  "Gênios da Ciência"
+    },
+    {
+        "id":  "gratidao",
+        "name":  "Gratidão"
+    },
+    {
+        "id":  "humor",
+        "name":  "Humor"
+    },
+    {
+        "id":  "impacto",
+        "name":  "Frases de impacto"
+    },
+    {
+        "id":  "indiretas",
+        "name":  "Indiretas"
+    },
+    {
+        "id":  "ingles",
+        "name":  "Inglês"
+    },
+    {
+        "id":  "legendas",
+        "name":  "Legendas p/ fotos"
+    },
+    {
+        "id":  "mae",
+        "name":  "Para a Mãe"
+    },
+    {
+        "id":  "maloka",
+        "name":  "Quebrada"
+    },
+    {
+        "id":  "mensagens",
+        "name":  "Mensagens"
+    },
+    {
+        "id":  "mentalidade",
+        "name":  "Mentalidade Forte"
+    },
+    {
+        "id":  "motivacao",
+        "name":  "Motivação"
+    },
+    {
+        "id":  "namoro",
+        "name":  "Namoro"
+    },
+    {
+        "id":  "natal",
+        "name":  "Natal \u0026 Festas"
+    },
+    {
+        "id":  "oracao",
+        "name":  "Orações \u0026 Bênçãos"
+    },
+    {
+        "id":  "pai",
+        "name":  "Para o Pai"
+    },
+    {
+        "id":  "pascoa",
+        "name":  "Páscoa"
+    },
+    {
+        "id":  "paz",
+        "name":  "Paz interior"
+    },
+    {
+        "id":  "pensadores",
+        "name":  "Pensadores"
+    },
+    {
+        "id":  "pets",
+        "name":  "Pets \u0026 Amor Animal"
+    },
+    {
+        "id":  "poemas",
+        "name":  "Poemas"
+    },
+    {
+        "id":  "proverbios",
+        "name":  "Provérbios"
+    },
+    {
+        "id":  "reflexao",
+        "name":  "Reflexão"
+    },
+    {
+        "id":  "sarcasmo",
+        "name":  "Sarcasmo"
+    },
+    {
+        "id":  "saudade",
+        "name":  "Saudade"
+    },
+    {
+        "id":  "segunda",
+        "name":  "Segunda-feira"
+    },
+    {
+        "id":  "selfie",
+        "name":  "Selfie"
+    },
+    {
+        "id":  "sextou",
+        "name":  "Sextou"
+    },
+    {
+        "id":  "status",
+        "name":  "Status curtos"
+    },
+    {
+        "id":  "status_amor",
+        "name":  "Status de amor"
+    },
+    {
+        "id":  "sucesso_dinheiro",
+        "name":  "Sucesso \u0026 Foco"
+    },
+    {
+        "id":  "superacao",
+        "name":  "Superação"
+    },
+    {
+        "id":  "tatuagem",
+        "name":  "Tatuagem"
+    },
+    {
+        "id":  "textos",
+        "name":  "Textos"
+    },
+    {
+        "id":  "treino",
+        "name":  "Treino \u0026 Garra"
+    },
+    {
+        "id":  "tumblr",
+        "name":  "Tumblr"
+    },
+    {
+        "id":  "versiculos",
+        "name":  "Versículos"
+    },
+    {
+        "id":  "viagem",
+        "name":  "Viagem \u0026 Liberdade"
+    },
+    {
+        "id":  "vida_leve",
+        "name":  "Vida leve"
+    },
+    {
+        "id":  "vida_loka",
+        "name":  "Vida loka"
+    },
+    {
+        "id":  "vinganca",
+        "name":  "Karma"
+    },
+    {
+        "id":  "visionarios",
+        "name":  "Mentes que Mudaram o Mundo"
+    }
+]

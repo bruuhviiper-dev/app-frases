@@ -1,0 +1,8 @@
+# Cole aqui frases novas, UMA POR LINHA. Linhas começando com # são ignoradas.
+# Depois rode:  dart run tool/classify_phrases.dart tool/input_phrases.txt
+# A IA classifica cada uma na categoria certa e gera content/generated_phrases.json
+Bom dia! Que hoje a sua fé seja maior que qualquer obstáculo.
+Te amo mais do que ontem e menos do que amanhã.
+Sextou! Bora comemorar a semana vencida.
+Foco no objetivo, o resto é distração.
+Vim da quebrada e não esqueço das minhas raízes.
