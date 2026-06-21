@@ -99,13 +99,18 @@ class AppTheme {
   static ThemeData _build(Brightness brightness, Color accent) {
     final isDark = brightness == Brightness.dark;
 
+    // Mistura a cor do tema na base para o app inteiro "vestir" a cor escolhida.
+    Color tint(Color base, double a) =>
+        Color.alphaBlend(accent.withValues(alpha: a), base);
+
     final scheme = ColorScheme.fromSeed(
       seedColor: accent,
       brightness: brightness,
     ).copyWith(
       primary: accent,
-      surface: isDark ? darkSurface : lightSurface,
-      surfaceContainerHighest: isDark ? darkSurfaceHigh : lightSurfaceAlt,
+      surface: isDark ? tint(darkSurface, 0.06) : lightSurface,
+      surfaceContainerHighest:
+          isDark ? tint(darkSurfaceHigh, 0.10) : tint(lightSurfaceAlt, 0.14),
       onSurface: isDark ? Colors.white : ink,
     );
 
@@ -123,8 +128,8 @@ class AppTheme {
           ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3),
     );
 
-    final bg = isDark ? darkBackground : lightBackground;
-    final surface = isDark ? darkSurfaceHigh : lightSurface;
+    final bg = isDark ? tint(darkBackground, 0.06) : tint(lightBackground, 0.05);
+    final surface = isDark ? tint(darkSurfaceHigh, 0.06) : lightSurface;
 
     return ThemeData(
       useMaterial3: true,

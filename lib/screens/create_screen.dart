@@ -56,7 +56,7 @@ class _CreateScreenState extends State<CreateScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: AppTheme.gradient(AppTheme.redGradient),
+              gradient: AppTheme.gradient(state.accentGradient),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(

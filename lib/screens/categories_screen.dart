@@ -141,8 +141,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   clipBehavior: Clip.antiAlias,
                   child: Ink(
                     decoration: BoxDecoration(
-                      gradient: AppTheme.gradient(
-                          const [Color(0xFF6A11CB), Color(0xFF2575FC)]),
+                      gradient: AppTheme.gradient(state.accentGradient),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: InkWell(
@@ -217,7 +216,7 @@ class _Logo extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        gradient: AppTheme.gradient(AppTheme.redGradient),
+        gradient: AppTheme.gradient(context.watch<AppState>().accentGradient),
         borderRadius: BorderRadius.circular(11),
       ),
       child: const Icon(Icons.format_quote_rounded, color: Colors.white, size: 22),
