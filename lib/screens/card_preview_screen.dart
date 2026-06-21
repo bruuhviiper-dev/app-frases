@@ -1,5 +1,9 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:gal/gal.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_theme.dart';
@@ -50,6 +54,85 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
           align: t.align,
           lightText: t.lightText,
         ));
+  }
+
+  void _unlock(AppState s) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, 2),
+              child: Text('Recurso PRO 💎',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                  'Desbloqueie com o Premium ou assista a um anúncio e use por 24h.',
+                  textAlign: TextAlign.center),
+            ),
+            ListTile(
+              leading: const Icon(Icons.play_circle_fill_rounded,
+                  color: Color(0xFF16A34A)),
+              title: const Text('Assistir anúncio e liberar 24h'),
+              onTap: () {
+                Navigator.pop(ctx);
+                s.grantTemporaryPro(const Duration(hours: 24));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('PRO liberado por 24h! Aproveite 🎉')));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_rounded,
+                  color: Color(0xFFD9A406)),
+              title: const Text('Comprar Premium'),
+              subtitle: const Text('Desbloqueia pra sempre'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const StoreScreen()));
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveGallery() async {
+    final s = context.read<AppState>();
+    if (!(s.isPremium ||
+        s.canRemoveWatermark ||
+        s.ownsExclusivePack ||
+        s.hasTemporaryPro)) {
+      _unlock(s);
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final boundary =
+          _captureKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final img = await boundary.toImage(pixelRatio: 3.5);
+      final bytes = await img.toByteData(format: ui.ImageByteFormat.png);
+      await Gal.putImageBytes(bytes!.buffer.asUint8List(),
+          album: 'Frases & Status');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Imagem salva na galeria! 📥')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Não foi possível salvar.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _share() async {
@@ -188,6 +271,11 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
       appBar: AppBar(
         title: const Text('Criar imagem'),
         actions: [
+          IconButton(
+            tooltip: 'Salvar na galeria (HD)',
+            icon: const Icon(Icons.download_rounded),
+            onPressed: _busy ? null : _saveGallery,
+          ),
           IconButton(
             tooltip: 'Copiar texto',
             icon: const Icon(Icons.copy_rounded),

@@ -51,3 +51,5 @@ app.*.map.json
 
 # Build do Android (saida)
 /android/build/
+
+*.hprof

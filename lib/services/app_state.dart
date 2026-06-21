@@ -47,6 +47,7 @@ class AppState extends ChangeNotifier {
   static const String pPackExclusivas = 'pack_exclusivas';
   static const String pCustomSignature = 'custom_signature';
   static const _kCustomSignature = 'custom_signature_text';
+  static const _kTempPro = 'temp_pro_until';
 
   /// Marcos da ofensiva que disparam uma celebração.
   static const List<int> streakMilestones = [3, 7, 14, 30, 60, 100, 180, 365];
@@ -60,6 +61,7 @@ class AppState extends ChangeNotifier {
   final Set<String> _subscriptions = {};
   DateTime? _tempStylesUntil;
   DateTime? _tempThemesUntil;
+  DateTime? _tempProUntil;
   String _customSignature = '';
   String _paletteId = 'classico';
   final List<String> _myPhrases = [];
@@ -134,6 +136,14 @@ class AppState extends ChangeNotifier {
   bool get canCustomSignature => ownsProduct(pCustomSignature);
 
   /// Texto da assinatura personalizada (vazio = usa a marca padrão do app).
+  bool get hasTemporaryPro =>
+      _tempProUntil != null && _tempProUntil!.isAfter(DateTime.now());
+  void grantTemporaryPro(Duration d) {
+    _tempProUntil = DateTime.now().add(d);
+    _prefs.setInt(_kTempPro, _tempProUntil!.millisecondsSinceEpoch);
+    notifyListeners();
+  }
+
   String get customSignature => _customSignature;
 
   /// Define a assinatura personalizada exibida nas imagens compartilhadas.
@@ -267,6 +277,8 @@ class AppState extends ChangeNotifier {
     _tempThemesUntil =
         ttu != null ? DateTime.fromMillisecondsSinceEpoch(ttu) : null;
     _customSignature = _prefs.getString(_kCustomSignature) ?? '';
+    final tp = _prefs.getInt(_kTempPro);
+    _tempProUntil = tp != null ? DateTime.fromMillisecondsSinceEpoch(tp) : null;
     _paletteId = _prefs.getString(_kPaletteId) ?? 'classico';
     // Se perdeu o direito à paleta (ex.: reembolso), volta pro tema grátis.
     if (!ownsPalette(_paletteId)) _paletteId = 'classico';
