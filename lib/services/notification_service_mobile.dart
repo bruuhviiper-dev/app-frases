@@ -64,7 +64,7 @@ class NotificationService {
 
     // Usa só frases GENÉRICAS no lembrete (evita "Bom dia/Boa noite" em
     // horário que não combina — o lembrete pode tocar a qualquer hora).
-    bool _timed(String t) {
+    bool timed(String t) {
       final l = t.toLowerCase();
       return l.contains('bom dia') ||
           l.contains('boa tarde') ||
@@ -74,7 +74,7 @@ class NotificationService {
     }
 
     final all = PhraseData.allPhrases;
-    final generic = all.where((p) => !_timed(p.text)).toList();
+    final generic = all.where((p) => !timed(p.text)).toList();
     final pool = generic.isNotEmpty ? generic : all;
     final dayIndex = DateTime.now().difference(DateTime(2020)).inDays;
     final morning = pool[dayIndex % pool.length];

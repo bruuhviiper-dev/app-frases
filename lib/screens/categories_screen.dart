@@ -448,7 +448,7 @@ class _CategoryGrid extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          childAspectRatio: 0.98,
+          childAspectRatio: 0.82,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, i) {
