@@ -13,7 +13,7 @@ class AdsService {
   AdsService._();
   static final AdsService instance = AdsService._();
 
-  static const bool _useTestAds = false;
+  static const bool _useTestAds = true;
 
   // ----- IDs de TESTE oficiais do Google -----
   static const _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
