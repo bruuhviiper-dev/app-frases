@@ -62,16 +62,29 @@ class NotificationService {
     if (!_initialized) await init();
     await _plugin.cancelAll();
 
-    final phrases = PhraseData.allPhrases;
+    // Usa só frases GENÉRICAS no lembrete (evita "Bom dia/Boa noite" em
+    // horário que não combina — o lembrete pode tocar a qualquer hora).
+    bool _timed(String t) {
+      final l = t.toLowerCase();
+      return l.contains('bom dia') ||
+          l.contains('boa tarde') ||
+          l.contains('boa noite') ||
+          l.contains('boa madrugada') ||
+          l.contains('bom-dia');
+    }
+
+    final all = PhraseData.allPhrases;
+    final generic = all.where((p) => !_timed(p.text)).toList();
+    final pool = generic.isNotEmpty ? generic : all;
     final dayIndex = DateTime.now().difference(DateTime(2020)).inDays;
-    final morning = phrases[dayIndex % phrases.length];
+    final morning = pool[dayIndex % pool.length];
 
     await _scheduleAt(0, '✨ Frase do dia', morning.text, hour, minute);
     debugPrint('Frase do dia agendada para ${hour}h$minute');
 
     if (evening) {
-      // Frase diferente da manhã (meia volta na lista).
-      final night = phrases[(dayIndex + phrases.length ~/ 2) % phrases.length];
+      // Frase diferente da manhã (meia volta na lista), também genérica.
+      final night = pool[(dayIndex + pool.length ~/ 2) % pool.length];
       await _scheduleAt(1, '🌙 Frase da noite', night.text, eveningHour, 0);
       debugPrint('Frase da noite agendada para ${eveningHour}h');
     }
